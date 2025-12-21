@@ -450,7 +450,7 @@
 				}
 				mid_price2=wi_c-incdecPrice2;
 				mid_price2=mid_price2.toFixed(2);
-				midline_txt2= '加權指數平盤：' + mid_price2.toString() ; 				
+				midline_txt2= '大盤平盤：' + mid_price2.toString() + '[' + incdecPrice2.toString() + ']' ; 				
 			}
 			for (i=0;i<wi_tt.length ;i++) {
 				let date = new Date(wi_tt[i] * 1000);
@@ -693,10 +693,12 @@
 			  });
 			  
 			document.getElementById('stopBtn').addEventListener('click', function() {
+					count=0;
 					running=true;
 			  });	  
 			
 			document.getElementById('goBtn').addEventListener('click', function() {
+					count=0;
 					running=false;
 			  });
 		  chart.update();	

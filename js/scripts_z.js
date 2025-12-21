@@ -90,7 +90,7 @@
               element1.style.width = width + '%'; 
             } 
                
-          $.getJSON('https://ws.api.cnyes.com/ws/api/v1/charting/history?resolution=1&symbol=TWS:1102:STOCK&quote=1',function(data){
+          $.getJSON('https://ws.api.cnyes.com/ws/api/v1/charting/history?resolution=1&symbol=TWS:2234:STOCK&quote=1',function(data){
               // console.log('success');
             $.each(data,function(key1,item1){
                if (key1 === 'data') {

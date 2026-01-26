@@ -1,5 +1,5 @@
 	const element1 = document.getElementById("myBar1");
-	const stockId_list=['2330','2454','3008','3661','2356','2303','2344','6770','2324','8150','2317','2002','2027','2308','2887','2347','2449','5410','3706','1301','2371','1504','0050','0056'];
+	const stockId_list=['2330','2454','3008','3661','2303','2356','2344','6770','2324','8150','2317','2002','2027','2308','2887','2347','2449','5410','3706','1301','2371','1504','0050','0056'];
 	const mask_item1 = document.getElementById("hiddenMsg1") ;
 	const mask_item2 = document.getElementById("hiddenMsg2") ;
 	const mask_button = document.getElementById("collapseBtn2") ;

@@ -536,7 +536,7 @@
 						  backgroundColor: '#000' ,
 						  font: {
 							size: 8,
-							weight: 100,  // Set 'lighter'
+							weight: 200,  // Set 'lighter'
 						  }
 						//  position: 'start'
 						}
@@ -558,7 +558,7 @@
 						  position: 'end',
 						  font: {
 								size: 8,
-								weight: 100, 
+								weight: 200, 
 						 }
 						}
 					  }

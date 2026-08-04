@@ -448,8 +448,8 @@ state.markets.forEach(m => {
 			await graphcardRender(STOCKID);
 			await resizeCanvas(STOCKID);
 			await renderMain(STOCKID);
-			await renderMarkets(0);
-			await tick(0);			
+			await renderMarkets(STOCKID);
+			await tick(STOCKID);			
 		}
 		else  { 		 
 			return;

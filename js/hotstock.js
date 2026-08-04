@@ -7,7 +7,7 @@
 	const list7=['2501','2504','2528','2542','5522','2515','2520','2539','2536','2540','2505','0050','00878','006208','00713','00692','00881','00919','00940','00757','00982A','00983A','00984A','00985A','00992A'];
 	const list8=['1402','1409','1413','1414','1417','1418','1419','1419','1434','1440','1441','0050','00878','006208','00713','00692','00881','00919','00940','00757','00982A','00983A','00984A','00985A','00992A'];
 	const list9=['1216','1210','1215','1229','1217','1218','1201','1702','1203','1737','3054','0050','00878','006208','00713','00692','00881','00919','00940','00757','00982A','00983A','00984A','00985A','00992A'];
-	const list10=['1903','1904','1905','1906','1907','1909','6790','6790','6790','6790','6790','0050','00878','006208','00713','00692','00881','00919','00940','00757','00982A','00983A','00984A','00985A','00992A'];
+	const list10=['1903','1904','1905','1906','1907','1909','6790','0050','00878','006208','00713','00692','00881','00919','00940','00757','00982A','00983A','00984A','00985A','00992A'];
 	const list11=['6214','2427','2453','2468','2471','2480','3029','4994','5203','6112','6183','0050','00878','006208','00713','00692','00881','00919','00940','00757','00982A','00983A','00984A','00985A','00992A'];
 	const MAIN = { sym: '大盤指數', id: '2353', price: 0 , high: 0, low: 0, change: 0 };
 	const MARKETS = [list1,list2,list3,list4,list5,list6,list7,list8,list9,list10,list11];
@@ -293,7 +293,15 @@
 			  abacusbtn.textContent = "\u{1F9EE}" ;
 			  abacusbtn.onclick = () => countProfit(stockId,firstVisit);  
 			  abacusCell.appendChild(abacusbtn);
-			  row.appendChild(abacusCell);			  
+			  row.appendChild(abacusCell);
+			  const alarmCell = document.createElement('div');
+			  alarmCell.className = 'item-abacus';
+			  const alarmbtn = document.createElement('button');
+			  alarmbtn.className = 'btn-expand3'; 
+			  alarmbtn.textContent = "\u{1F514}" ;
+			  alarmbtn.onclick = () => showRealprice(stockId) ;  
+			  alarmCell.appendChild(alarmbtn);
+			  row.appendChild(alarmCell);			  
 			  mainList.appendChild(row);	
 		   // ================================
 		   //  Build Market List --- Ending

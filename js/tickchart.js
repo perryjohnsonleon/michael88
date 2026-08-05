@@ -305,7 +305,7 @@ function drawSpark(svgEl, data, isGain) {
   let itemName,incdecPrice,itemPrice,incdectxtPrice,highPrice,lowPrice;
   const m = state.markets;
   const post = await getData(9999);
-  if (post) {		  
+  if (post) {
 		const wi_o=post.data.o;
 		const wi_h=post.data.h;
 		const wi_c=post.data.c;
@@ -434,7 +434,7 @@ state.markets.forEach(m => {
 	await graphcardRender(stockId);
 	await resizeCanvas(stockId);
 	await renderMain(stockId);
-	await renderMarkets();
+	await renderMarkets(stockId);
     id=setInterval(async() => {
 		const marketClosetime = "13:30:00" , marketOpentime = "09:00:00" ; 
 		const [h2, m2, s2] = marketClosetime.split(':').map(Number);
@@ -449,7 +449,7 @@ state.markets.forEach(m => {
 			await resizeCanvas(STOCKID);
 			await renderMain(STOCKID);
 			await renderMarkets(STOCKID);
-			await tick(STOCKID);			
+			// await tick(STOCKID);			
 		}
 		else  { 		 
 			return;

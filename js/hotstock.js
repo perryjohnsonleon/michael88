@@ -36,11 +36,12 @@
 			  clearInterval(intervalIds.pop());
 			}
 			const symId=event.target.value;	
-			if (symId == 9999)	{
-				return }  
-			else  {
-			startShow(symId)
-			}	
+			if (symId == 9999)	
+				return   
+			else if (symId === "Z" )
+				displayWPost()
+			else
+				startShow(symId) ;				
 		});		
 	}); 
 		
@@ -80,7 +81,7 @@
 		else
 			fetchUrl_str=fetchUrl_str1 + stockId + fetchUrl_str2 ;
 		if (stockId == 8888 ) fetchUrl_str="https://ws.api.cnyes.com/ws/api/v1/charting/history?symbol=TWS:TSE01:INDEX&resolution=D&quote=1&from=NaN&to=NaN" ;
-		if (stockId == 7777 ) fetchUrl_str="https://ws.api.cnyes.com/ws/api/v1/charting/history?symbol=TWS:TSE01:INDEX&resolution=D&quote=1&from=NaN&to=NaN" ;		
+		if (stockId == 7777 ) fetchUrl_str="https://ws.api.cnyes.com/ws/api/v3/universal/quote?type=IDXMAJOR&column=B&page=1&limit=20" ;		
 		const response = await fetch(fetchUrl_str);
 		if (!response.ok) {
 		  throw new Error(`HTTP error! status: ${response.status}`);
@@ -98,7 +99,7 @@
 	}  
   
   
-       function getWDATA1() {
+   function getWDATA1() {
 		// https://invest.cnyes.com/indices/major 世界各國主要指數
 		// https://ws.api.cnyes.com/ws/api/v3/universal/quote?type=IDXMAJOR&column=B&page=1&limit=20	
 		// data.items ['200009'品名,'11'收盤,'12'最高,'13'最低]	 陣列排序 1.日本 2. 韓國 ˇ3.集中 4.櫃買 5.6.恆生 7.8.9.10上證滬深 11 英 12 法 13 德
@@ -206,6 +207,89 @@
 		return null;
      }
   }
+  
+  async function displayWPost() {
+	  mainList.textContent = "";
+	  const post = await getPost(7777);
+	  if (post) {
+			const ITEMS = post.data.items ;
+			const ITEM1 = ITEMS.slice(13, 17);
+			const ITEM2 = ITEMS.slice(0, 12);	
+			ITEM1.forEach((quote_obj,idx) => {
+				for ( var n in quote_obj) {
+					if ( n == "200009" ) MAIN.sys=quote_obj[n];
+					if ( n == "6" ) MAIN.price= quote_obj[n];
+					if ( n == "11" ) MAIN.change=quote_obj[n];  
+					if ( n == "12" ) MAIN.high=quote_obj[n];
+					if ( n == "13" ) MAIN.low= quote_obj[n];
+				} 
+				  const row = document.createElement('div');
+				  row.style.display = 'flex';
+				  const nameCell = document.createElement('div');
+				  nameCell.className = 'item2';
+				  nameCell.textContent = MAIN.sys;
+				  row.appendChild(nameCell);
+				  const priceCell = document.createElement('div');
+				  priceCell.className = 'item3w';
+				  priceCell.textContent = MAIN.price;		  
+				  if (MAIN.change > 0) priceCell.classList.add('risePrice');
+				  else if (MAIN.change < 0) priceCell.classList.add('fellPrice');
+				  else priceCell.classList.add('flatPrice');			  
+				  row.appendChild(priceCell);
+				  const gainCell = document.createElement('div');
+				  gainCell.className = 'item3w';
+				  gainCell.textContent = MAIN.change;
+				  if (MAIN.change > 0) gainCell.classList.add('risePrice');
+				  else if (MAIN.change < 0) gainCell.classList.add('fellPrice');
+				  else gainCell.classList.add('flatPrice');
+				  row.appendChild(gainCell);
+				  [MAIN.high, MAIN.low].forEach(value => {
+					const cell = document.createElement('div');
+					cell.className = 'item3w';
+					cell.textContent = value;
+					row.appendChild(cell);
+				  });		  
+				  mainList.appendChild(row);							
+			});
+			ITEM2.forEach((quote_obj,idx) => {
+				for ( var n in quote_obj) {
+					if ( n == "200009" ) MAIN.sys=quote_obj[n];
+					if ( n == "6" ) MAIN.price= quote_obj[n];
+					if ( n == "11" ) MAIN.change=quote_obj[n];  
+					if ( n == "12" ) MAIN.high=quote_obj[n];
+					if ( n == "13" ) MAIN.low= quote_obj[n];
+				} 
+				  const row = document.createElement('div');
+				  row.style.display = 'flex';
+				  const nameCell = document.createElement('div');
+				  nameCell.className = 'item2';
+				  nameCell.textContent = MAIN.sys;
+				  row.appendChild(nameCell);
+				  const priceCell = document.createElement('div');
+				  priceCell.className = 'item3w';
+				  priceCell.textContent = MAIN.price;		  
+				  if (MAIN.change > 0) priceCell.classList.add('risePrice');
+				  else if (MAIN.change < 0) priceCell.classList.add('fellPrice');
+				  else priceCell.classList.add('flatPrice');			  
+				  row.appendChild(priceCell);
+				  const gainCell = document.createElement('div');
+				  gainCell.className = 'item3w';
+				  gainCell.textContent = MAIN.change;
+				  if (MAIN.change > 0) gainCell.classList.add('risePrice');
+				  else if (MAIN.change < 0) gainCell.classList.add('fellPrice');
+				  else gainCell.classList.add('flatPrice');
+				  row.appendChild(gainCell);
+				  [MAIN.high, MAIN.low].forEach(value => {
+					const cell = document.createElement('div');
+					cell.className = 'item3w';
+					cell.textContent = value;
+					row.appendChild(cell);
+				  });		  
+				  mainList.appendChild(row);							
+			});
+	   }
+	
+  }  
 
  async function displayPost(stockId,itemId) {
 	  const post = await getPost(stockId);
@@ -461,11 +545,11 @@
     }
 	
 	async function showRealprice(stockNo) {
-		window.location.href = 'https://perryjohnsonleon.github.io/winder/tickchart.htm?stockid=' + stockNo ;
+		window.location.href = 'http://127.0.0.1:8000/winder/tickchart.htm?stockid=' + stockNo ;
     }
 	
 	async function countProfit(stockNo) {
-		window.location.href = 'https://perryjohnsonleon.github.io/winder/cal.htm?stockid=' + stockNo ;
+		window.location.href = 'http://127.0.0.1:8000/winder/cal.htm?stockid=' + stockNo ;
     }
 
 	function collapseElement() {

@@ -331,7 +331,7 @@
 					if ( n == "12" ) MAIN.high=quote_obj[n];
 					if ( n == "13" ) MAIN.low= quote_obj[n];
 				} 
-				// document.getElementById(elemId_2).innerHTML =  "<button id='" + btn2_expandId + "' onclick=\"window.location.href='https://perryjohnsonleon.github.io/ddww/tickchart.htm?stockId=" + stockId + "';\">" + elemId_price + "</button>";
+				// document.getElementById(elemId_2).innerHTML =  "<button id='" + btn2_expandId + "' onclick=\"window.location.href='https://perryjohnsonleon.github.io/winder/tickchart.htm?stockId=" + stockId + "';\">" + elemId_price + "</button>";
 		   }
 		   // ================================
 			  const row = document.createElement('div');
@@ -353,7 +353,7 @@
 			  else if (MAIN.change < 0) pricebtn.classList.add('fellPrice');
 			  else pricebtn.classList.add('flatPrice');			  
 			  pricebtn.textContent = MAIN.price;
-			//  pricebtn.onclick = "window.location.href='https://perryjohnsonleon.github.io/ddww/tickchart.htm?stockId=" + stockId + "'";  
+			//  pricebtn.onclick = "window.location.href='https://perryjohnsonleon.github.io/winder/tickchart.htm?stockId=" + stockId + "'";  
 			  pricebtn.onclick = () => showRealprice(stockId) ;  	 
 			  priceCell.appendChild(pricebtn);
 			  row.appendChild(priceCell);
@@ -383,7 +383,7 @@
 			  const alarmbtn = document.createElement('button');
 			  alarmbtn.className = 'btn-expand3'; 
 			  alarmbtn.textContent = "\u{1F514}" ;
-			  alarmbtn.onclick = () => showRealprice(stockId) ;  
+			  alarmbtn.onclick = () => alarmPrice(stockId) ;  
 			  alarmCell.appendChild(alarmbtn);
 			  row.appendChild(alarmCell);			  
 			  mainList.appendChild(row);	
@@ -547,6 +547,10 @@
 	async function showRealprice(stockNo) {
 		window.location.href = 'https://perryjohnsonleon.github.io/winder/tickchart.htm?stockid=' + stockNo ;
     }
+	
+	async function alarmPrice(stockNo) {
+		window.location.href = 'https://perryjohnsonleon.github.io/winder/testalarm.htm?stockid=' + stockNo ;
+    }	
 	
 	async function countProfit(stockNo) {
 		window.location.href = 'https://perryjohnsonleon.github.io/winder/cal.htm?stockid=' + stockNo ;

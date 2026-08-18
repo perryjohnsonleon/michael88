@@ -33,50 +33,38 @@ body {
   margin:0px;
   border:0px;
   padding:2px;
-  color:#fff;
-// color:#0B0A0A;
+  color:#0B0A0A;
   font-weight:600 ;
   background-color:rgba(96, 136, 136); 
- // background-color:#007799; 
+ //  background-color:#007799; 
   font-size:13px;
   border: none;
 }	
 
 .btn2-expand {
- color:#000;
+ color:#000;	
  background-color:#6a9595; 
  border: none;
 }
 
 .btn-risePrice {
-  margin:0px;
-  border:0px;
-  padding:2px;
   color: #F30E4B;
-  font-weight:400 ; 
   background-color:#6a9595;
-  font-size:15px;  
+  font-size:14px;  
   border: none;
  }
 
 .btn-fellPrice {
-  margin:0px;
-  border:0px;
-  padding:2px;
   color: #1DC91D;
-  font-weight:400 ; 
   background-color:#6a9595; 
-  font-size:15px; 
+  font-size:14px; 
   border: none;
   }
 
 .btn-flatPrice {
-  margin:0px;
-  border:0px;
-  padding:2px;
-  color:#c3dbbd;
+  color: #fff;
   background-color:#6a9595;
-  font-size:15px;   
+  font-size:14px;   
   border: none;
   }	
 
@@ -147,7 +135,7 @@ body {
   }
 
 .flatPrice {
-  color:#c3dbbd;
+  color: #fff;
   }
 
  .wi-risePrice {

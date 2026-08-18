@@ -1,11 +1,16 @@
+  var canvas = document.getElementById('priceCanvas');
+  var ctx2d = canvas.getContext('2d');
+  var running=false,sw_no=1,firstVisit=true,intervalIds=[];
   var state = {
-    price: 184.20,
-    open: 184.20,
-    dayHigh: 184.20,
-    dayLow: 184.20,
-    history: [184.20],
-    rise: { enabled: true, target: 190.00, prevHit: false },
-    fall: { enabled: false, target: 178.00, prevHit: false },
+	sym: '—',  
+    price: 0,
+    open: 0,
+	change: 0,
+    dayHigh: 0,
+    dayLow: 0,
+    history: [],
+    rise: { enabled: true, target: 10.00, prevHit: false },
+    fall: { enabled: false, target: 10.00, prevHit: false },
     chimeOn: true,
     ring: {
       rise: { ringing: false, endAt: 0, timer: null },
@@ -15,12 +20,75 @@
   };
 
   var indices = [
-    { base: 5412.30, val: 5412.30, dec: 2, thousands: true },
-    { base: 17880.05, val: 17880.05, dec: 2, thousands: true },
-    { base: 14.62, val: 14.62, dec: 2, thousands: false }
+    { base: 10.42, val: 10.32, dec: 0.01, thousands: true },
+    { base: 18.47, val: 18.24, dec: 0.01, thousands: true },
+    { base: 23.53, val: 23.28, dec: 0.01, thousands: false }
   ];
+  var RING_DURATION_MS = 2 * 60 * 1000; 
 
+  /* ============ DOM refs ============ */
   var audioCtx = null;
+  var alertBtn = document.getElementById('alertBtn');
+  var overlay = document.getElementById('overlay');
+  var closeDrawer = document.getElementById('closeDrawer');
+  var riseEnabledInput = document.getElementById('riseEnabledInput');
+  var fallEnabledInput = document.getElementById('fallEnabledInput');
+  var riseTargetInput = document.getElementById('riseTargetInput');
+  var fallTargetInput = document.getElementById('fallTargetInput');
+  var saveAlert = document.getElementById('saveAlert');
+  var chimeBtn = document.getElementById('chimeBtn');
+  var chimeLabel = document.getElementById('chimeLabel');  
+  var alertBtn = document.getElementById('alertBtn');
+  var overlay = document.getElementById('overlay');
+  var closeDrawer = document.getElementById('closeDrawer');
+  var riseEnabledInput = document.getElementById('riseEnabledInput');
+  var fallEnabledInput = document.getElementById('fallEnabledInput');
+  var riseTargetInput = document.getElementById('riseTargetInput');
+  var fallTargetInput = document.getElementById('fallTargetInput');
+  var saveAlert = document.getElementById('saveAlert');
+  var chimeBtn = document.getElementById('chimeBtn');
+  var chimeLabel = document.getElementById('chimeLabel');
+  var riseArmedDot = document.getElementById('riseArmedDot');
+  var fallArmedDot = document.getElementById('fallArmedDot');
+  var riseStatusLine = document.getElementById('riseStatusLine');
+  var fallStatusLine = document.getElementById('fallStatusLine');
+  var noAlertLine = document.getElementById('noAlertLine');
+  var riseTargetDisplay = document.getElementById('riseTargetDisplay');
+  var fallTargetDisplay = document.getElementById('fallTargetDisplay');
+  var priceValue = document.getElementById('priceValue');
+  var changeBadge = document.getElementById('changeBadge');
+  var changeText = document.getElementById('changeText');
+  var changeArrow = document.getElementById('changeArrow');
+  var symEl = document.getElementById('sym');  
+  var dayOpenEl = document.getElementById('dayOpen');
+  var dayHighEl = document.getElementById('dayHigh');
+  var dayLowEl = document.getElementById('dayLow');
+  var riseGaugeRow = document.getElementById('riseGaugeRow');
+  var riseGaugeFill = document.getElementById('riseGaugeFill');
+  var riseGaugeMarker = document.getElementById('riseGaugeMarker');
+  var riseGaugePct = document.getElementById('riseGaugePct');
+  var riseGaugeOpen = document.getElementById('riseGaugeOpen');
+  var riseGaugeCurrent = document.getElementById('riseGaugeCurrent');
+  var riseGaugeTargetVal = document.getElementById('riseGaugeTargetVal');
+  var riseGaugeTargetLbl = document.getElementById('riseGaugeTargetLbl');
+  var fallGaugeRow = document.getElementById('fallGaugeRow');
+  var fallGaugeFill = document.getElementById('fallGaugeFill');
+  var fallGaugeMarker = document.getElementById('fallGaugeMarker');
+  var fallGaugePct = document.getElementById('fallGaugePct');
+  var fallGaugeOpen = document.getElementById('fallGaugeOpen');
+  var fallGaugeCurrent = document.getElementById('fallGaugeCurrent');
+  var fallGaugeTargetVal = document.getElementById('fallGaugeTargetVal');
+  var fallGaugeTargetLbl = document.getElementById('fallGaugeTargetLbl');
+  var noGaugeMsg = document.getElementById('noGaugeMsg');
+  
+  window.addEventListener('load',function(){
+	    chimeBtn.classList.add('chime-on');
+		const url=window.location.search;
+		// stockId = url.substring(url.indexOf('=') + 1);
+		stockId = url.substring(9);
+		startShow(stockId);
+	  }); 
+	  
   function getAudioCtx(){
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -81,7 +149,6 @@
     state.activeNodes = [];
   }
 
-  var RING_DURATION_MS = 2 * 60 * 1000;
   function startRinging(dir){
     var r = state.ring[dir];
     if (r.ringing) return;
@@ -89,6 +156,7 @@
     r.endAt = Date.now() + RING_DURATION_MS;
     ringLoop(dir);
   }
+  
   function ringLoop(dir){
     var r = state.ring[dir];
     if (!state.chimeOn || Date.now() >= r.endAt){
@@ -98,28 +166,19 @@
     playChime(12, dir);
     r.timer = setTimeout(function(){ ringLoop(dir); }, 12 * 0.72 * 1000 + 300);
   }
+  
   function stopRinging(dir){
     var r = state.ring[dir];
     r.ringing = false;
     r.endAt = 0;
     if (r.timer) clearTimeout(r.timer);
   }
+  
   function stopAllRinging(){
     stopRinging('rise');
     stopRinging('fall');
     silenceAllChimes();
   }
-
-  var alertBtn = document.getElementById('alertBtn');
-  var overlay = document.getElementById('overlay');
-  var closeDrawer = document.getElementById('closeDrawer');
-  var riseEnabledInput = document.getElementById('riseEnabledInput');
-  var fallEnabledInput = document.getElementById('fallEnabledInput');
-  var riseTargetInput = document.getElementById('riseTargetInput');
-  var fallTargetInput = document.getElementById('fallTargetInput');
-  var saveAlert = document.getElementById('saveAlert');
-  var chimeBtn = document.getElementById('chimeBtn');
-  var chimeLabel = document.getElementById('chimeLabel');
 
   function syncDrawerFromState(){
     riseEnabledInput.checked = state.rise.enabled;
@@ -129,9 +188,11 @@
     fallTargetInput.value = state.fall.target.toFixed(2);
     fallTargetInput.disabled = !state.fall.enabled;
   }
+  
   riseEnabledInput.addEventListener('change', function(){
     riseTargetInput.disabled = !riseEnabledInput.checked;
   });
+  
   fallEnabledInput.addEventListener('change', function(){
     fallTargetInput.disabled = !fallEnabledInput.checked;
   });
@@ -141,6 +202,7 @@
     syncDrawerFromState();
     overlay.classList.add('open');
   });
+  
   closeDrawer.addEventListener('click', function(){ overlay.classList.remove('open'); });
   overlay.addEventListener('click', function(e){ if (e.target === overlay) overlay.classList.remove('open'); });
 
@@ -158,6 +220,7 @@
       fallTargetInput.style.borderColor = 'var(--loss)';
       return;
     }
+	
     riseTargetInput.style.borderColor = '';
     fallTargetInput.style.borderColor = '';
 
@@ -182,15 +245,6 @@
     chimeLabel.textContent = state.chimeOn ? 'Chime on' : 'Chime off';
     if (!state.chimeOn) stopAllRinging();
   });
-  chimeBtn.classList.add('chime-on');
-
-  var riseArmedDot = document.getElementById('riseArmedDot');
-  var fallArmedDot = document.getElementById('fallArmedDot');
-  var riseStatusLine = document.getElementById('riseStatusLine');
-  var fallStatusLine = document.getElementById('fallStatusLine');
-  var noAlertLine = document.getElementById('noAlertLine');
-  var riseTargetDisplay = document.getElementById('riseTargetDisplay');
-  var fallTargetDisplay = document.getElementById('fallTargetDisplay');
 
   function updateAlertStatus(){
     riseStatusLine.style.display = state.rise.enabled ? 'flex' : 'none';
@@ -206,82 +260,94 @@
       fallArmedDot.className = 'alert-armed-dot ' + (state.fall.prevHit ? 'fired' : 'armed');
     }
   }
-  updateAlertStatus();
 
-  var priceValue = document.getElementById('priceValue');
-  var changeBadge = document.getElementById('changeBadge');
-  var changeText = document.getElementById('changeText');
-  var changeArrow = document.getElementById('changeArrow');
+  async function getData(stockId) {
+	  if (firstVisit) {
+		  firstVisit=false;
+		  STOCKID=stockId
+	  }	  
+	  try {
+	  	let fetchUrl_str="" ;
+		let fetchUrl_str1="https://ws.api.cnyes.com/ws/api/v1/charting/history?resolution=1&symbol=TWS:" , fetchUrl_str2=":STOCK&quote=1" ;
+		if (stockId == 9999) {
+		    fetchUrl_str="https://ws.api.cnyes.com/ws/api/v1/charting/history?symbol=TWS:TSE01:INDEX&resolution=D&quote=1&from=NaN&to=NaN"
+		} else if (stockId == 0) {
+			fetchUrl_str="https://ws.api.cnyes.com/ws/api/v1/charting/history?resolution=1&symbol=TWS:TSE01:INDEX&quote=1"
+		} else {
+			fetchUrl_str=fetchUrl_str1 + stockId + fetchUrl_str2
+		}
+		const response = await fetch(fetchUrl_str); 
+	    if  (!response.ok) {
+		   throw new Error(`HTTP error!!!! status: ${response.status}`);
+		  }
+	    else {
+		  const result = await response.json();
+		  return result; 
+	    }
+	  } catch (error) {
+		console.error('Fetch error:', error);
+		return null;
+	  }
+	 }
 
-  function updateHero(){
-    var change = state.price - state.open;
-    var pct = (change / state.open) * 100;
-    var dirClass = change > 0.001 ? 'up' : (change < -0.001 ? 'down' : '');
-
-    priceValue.textContent = state.price.toFixed(2);
-    priceValue.className = 'price-value mono pulse ' + dirClass;
-    void priceValue.offsetWidth;
-    priceValue.classList.add('pulse');
-
-    changeBadge.className = 'change-badge mono ' + dirClass;
-    var sign = change >= 0 ? '+' : '';
-    changeText.textContent = sign + change.toFixed(2) + ' (' + sign + pct.toFixed(2) + '%)';
-    changeArrow.style.display = dirClass ? 'block' : 'none';
-    if (dirClass === 'down'){
-      changeArrow.innerHTML = '<path d="M12 5v14"/><path d="m19 12-7 7-7-7"/>';
-    } else {
-      changeArrow.innerHTML = '<path d="M12 19V5"/><path d="m5 12 7-7 7 7"/>';
-    }
+  async function updateHero(stockId){
+	  var itemName,incdecPrice,itemPrice,incdectxtPrice,highPrice,lowPrice,flatPrice,midPrice,change,pct,dirClass;
+	  const post = await getData(stockId);
+	  if (post) {			
+			const wi_o=post.data.o;
+			const wi_h=post.data.h;
+			const wi_c=post.data.c;
+			const wi_t=post.data.t;
+			const wi_oo=[...wi_o].reverse();
+			const wi_cc=[...wi_c].reverse();
+			const wi_tt=[...wi_t].reverse();
+			const quote_obj = post.data.quote ;
+			// const isGain = m.change >= 0;
+			for ( var n in quote_obj) {
+			   if ( n == "200009" ) itemName=quote_obj[n] ;
+			   if ( n == "11" ) incdecPrice=quote_obj[n] ;
+			   if ( n == "12" ) highPrice=quote_obj[n] ;
+			   if ( n == "13" ) lowPrice=quote_obj[n] ;
+			   if ( n == "6" ) itemPrice=quote_obj[n] ;
+			}
+		    if ( incdecPrice>0 ) 
+				incdectxtPrice="+" + incdecPrice.toString()
+		    else incdectxtPrice= incdecPrice ;
+		    midPrice=itemPrice-incdecPrice;
+			state.rise.target= midPrice*1.1 ;
+			state.fall.target= midPrice*0.9 ;			
+		    state.sym=itemName;
+		    state.price=itemPrice ;
+		    state.open=wi_oo[0] ;
+		    state.history=[...wi_c].reverse();
+		    state.dayHigh=highPrice ;
+		    state.dayLow=lowPrice ;
+			change = incdecPrice ;
+			symEl.textContent = state.sym;
+			pct = (change / state.open) * 100;
+			dirClass = change > 0.001 ? 'up' : (change < -0.001 ? 'down' : '');
+			priceValue.textContent = state.price.toFixed(2);
+			priceValue.className = 'price-value mono pulse ' + dirClass;
+			void priceValue.offsetWidth;
+			priceValue.classList.add('pulse');
+			changeBadge.className = 'change-badge mono ' + dirClass;
+			var sign = change >= 0 ? '+' : '';
+			changeText.textContent = sign + change.toFixed(2) + ' (' + sign + pct.toFixed(2) + '%)';
+			changeArrow.style.display = dirClass ? 'block' : 'none';
+			if (dirClass === 'down'){
+			  changeArrow.innerHTML = '<path d="M12 5v14"/><path d="m19 12-7 7-7-7"/>';
+			} else {
+			  changeArrow.innerHTML = '<path d="M12 19V5"/><path d="m5 12 7-7 7 7"/>';
+			}			
+		}  
   }
 
-  var dayOpenEl = document.getElementById('dayOpen');
-  var dayHighEl = document.getElementById('dayHigh');
-  var dayLowEl = document.getElementById('dayLow');
-
   function updateDayStats(){
+    symEl.textContent = state.sym;	  
     dayOpenEl.textContent = state.open.toFixed(2);
     dayHighEl.textContent = state.dayHigh.toFixed(2);
     dayLowEl.textContent = state.dayLow.toFixed(2);
   }
-
-  function updateIndices(){
-    indices.forEach(function(idx, i){
-      var drift = (Math.random() - 0.5) * (idx.base * 0.0009);
-      idx.val = Math.max(0.01, idx.val + drift);
-      var chg = ((idx.val - idx.base) / idx.base) * 100;
-      var dirClass = chg > 0.001 ? 'up' : (chg < -0.001 ? 'down' : '');
-      var valEl = document.getElementById('idx' + i + '-val');
-      var chgEl = document.getElementById('idx' + i + '-chg');
-      var displayVal = idx.thousands
-        ? idx.val.toLocaleString(undefined, { minimumFractionDigits: idx.dec, maximumFractionDigits: idx.dec })
-        : idx.val.toFixed(idx.dec);
-      valEl.textContent = displayVal;
-      valEl.className = 'idx-value mono ' + dirClass;
-      var sign = chg >= 0 ? '+' : '';
-      chgEl.textContent = sign + chg.toFixed(2) + '%';
-      chgEl.className = 'idx-change mono ' + dirClass;
-    });
-  }
-
-  var riseGaugeRow = document.getElementById('riseGaugeRow');
-  var riseGaugeFill = document.getElementById('riseGaugeFill');
-  var riseGaugeMarker = document.getElementById('riseGaugeMarker');
-  var riseGaugePct = document.getElementById('riseGaugePct');
-  var riseGaugeOpen = document.getElementById('riseGaugeOpen');
-  var riseGaugeCurrent = document.getElementById('riseGaugeCurrent');
-  var riseGaugeTargetVal = document.getElementById('riseGaugeTargetVal');
-  var riseGaugeTargetLbl = document.getElementById('riseGaugeTargetLbl');
-
-  var fallGaugeRow = document.getElementById('fallGaugeRow');
-  var fallGaugeFill = document.getElementById('fallGaugeFill');
-  var fallGaugeMarker = document.getElementById('fallGaugeMarker');
-  var fallGaugePct = document.getElementById('fallGaugePct');
-  var fallGaugeOpen = document.getElementById('fallGaugeOpen');
-  var fallGaugeCurrent = document.getElementById('fallGaugeCurrent');
-  var fallGaugeTargetVal = document.getElementById('fallGaugeTargetVal');
-  var fallGaugeTargetLbl = document.getElementById('fallGaugeTargetLbl');
-
-  var noGaugeMsg = document.getElementById('noGaugeMsg');
 
   function updateGauge(){
     riseGaugeRow.style.display = state.rise.enabled ? 'block' : 'none';
@@ -340,9 +406,6 @@
       state.fall.prevHit = fallHit;
     }
   }
-
-  var canvas = document.getElementById('priceCanvas');
-  var ctx2d = canvas.getContext('2d');
 
   function resizeCanvas(){
     var rect = canvas.getBoundingClientRect();
@@ -446,38 +509,37 @@
     ctx2d.globalAlpha = 1;
   }
 
-  window.addEventListener('resize', resizeCanvas);
+  async function startShow(stockId) {
+	  	await resizeCanvas(stockId);
+		await updateAlertStatus();	   
+		await updateHero(stockId);
+		await updateDayStats();
+		await updateGauge(stockId);
+		await drawChart(stockId);
+		await updateAlertStatus();
+		id=setInterval(async() => {
+			const marketClosetime = "22:30:00" , marketOpentime = "09:00:00" ; 
+			const [h2, m2, s2] = marketClosetime.split(':').map(Number);
+			const timeToSeconds2= h2 * 3600 + m2 * 60 + s2 ;
+			const [h1, m1, s1] = marketOpentime.split(':').map(Number);
+			const timeToSeconds1= h1 * 3600 + m1 * 60 + s1 ;			
+			const now = new Date();
+			const nowSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();	
+			if ((nowSeconds > timeToSeconds1) && (nowSeconds < timeToSeconds2)) {
+				if  (running) return;
+				await updateHero(stockId);
+				await resizeCanvas(STOCKID);			
+				await updateGauge(STOCKID);
+				await drawChart(STOCKID);
+				await checkAlert(STOCKID);		
+			}
+			else  { 		 
+				return;
+			 }	
 
-  function tick(){
-    var volatility = 0.32;
-    var drift = (Math.random() - 0.5) * volatility;
-    state.price = Math.max(0.5, state.price + drift);
-    state.history.push(state.price);
-    if (state.history.length > 90) state.history.shift();
-    if (state.price > state.dayHigh) state.dayHigh = state.price;
-    if (state.price < state.dayLow) state.dayLow = state.price;
+			 running=false ;
+		},
+	   20000);
+	   intervalIds.push(id); 
+ } 
 
-    updateHero();
-    updateDayStats();
-    updateIndices();
-    updateGauge();
-    drawChart();
-    checkAlert();
-  }
-
-  for (var i = 0; i < 40; i++){
-    var d = (Math.random() - 0.5) * 0.32;
-    state.price = Math.max(0.5, state.price + d);
-    state.history.push(state.price);
-  }
-  state.open = state.history[0];
-  state.dayHigh = Math.max.apply(null, state.history);
-  state.dayLow = Math.min.apply(null, state.history);
-
-  resizeCanvas();
-  updateHero();
-  updateDayStats();
-  updateIndices();
-  updateGauge();
-  updateAlertStatus();
-  setInterval(tick, 1500);

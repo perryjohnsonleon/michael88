@@ -155,18 +155,18 @@
   ctx.setLineDash([4, 6]);
   ctx.moveTo(pad.left, openY);
   ctx.lineTo(w - pad.right, openY);
-  ctx.strokeStyle = 'rgba(180,190,220,0.35)';
-  ctx.lineWidth = 1 ;
+  ctx.strokeStyle = 'rgba(255,176,32)';
+  ctx.lineWidth = 1.7 ;
   ctx.shadowBlur = 0;
   ctx.stroke();
   ctx.setLineDash([]);
   ctx.font = '9px DM Mono';
-  ctx.fillStyle = 'rgba(180,190,220,0.45)';
+  ctx.fillStyle = 'rgba(255,176,32)';
   ctx.textAlign = 'left';
   ctx.fillText('平盤  $' + flatPrice.toFixed(2), pad.left + 4, openY - 4);
   // Price labels y-axis
   ctx.font = '10px DM Mono';
-  ctx.fillStyle = 'rgba(74,80,104,0.9)';
+  ctx.fillStyle = 'rgba(74,80,104)';
   ctx.textAlign = 'right';
   [0.25, 0.5, 0.75].forEach(t => {
     const val = min + range * t;
